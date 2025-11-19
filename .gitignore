@@ -1,81 +1,77 @@
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-.kotlin
-
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-
-### Mac OS ###
+# ── OS / system ────────────────────────────────────────────────────────────────
 .DS_Store
+Thumbs.db
 
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
 *.iml
 *.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+*.iws
+.vscode/
 
-### NetBeans ###
+# Eclipse / STS / NetBeans (gdyby ktoś użył)
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.apt_generated
+.factorypath
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
+# ── Java / Kotlin / build artefacts ───────────────────────────────────────────
+*.class
+*.log
+*.javadoc
+*.zip
+*.tar
+*.tar.gz
+
+# Gradle
+.gradle/
+**/.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+.kotlinc/
+.kotlin/
+out/
+**/out/
+bin/
+**/bin/
+
+# Maven (jeśli gdzieś użyjesz)
+target/
+
+# ── Spring Boot config (lokalne warianty) ─────────────────────────────────────
+application-*.yml
+application-*.yaml
+application-*.properties
+
+# ── Env / sekrety ─────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Docker / Postgres bind mounts ─────────────────────────────────────────────
+# Dane kontenera Postgresa i pgAdmina (z docker-compose)
+data/postgres/
+data/pgadmin/
+
+# Kopie zapasowe bazy (trzymaj tylko .gitkeep/README)
+backups/*
+!backups/.gitkeep
+# (jeśli wolisz trzymać README.md)
+# !backups/README.md
+
+# ── Inne pliki tymczasowe / merdżowe ──────────────────────────────────────────
+*.orig
+*.rej
+
+# (opcjonalnie) plik pomocniczy ze Spring Initializr
+HELP.md
+
