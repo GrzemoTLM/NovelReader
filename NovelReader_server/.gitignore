@@ -38,6 +38,8 @@ out/
 
 ### Database data ###
 data/
-
+backups/
+.env
+*.db
 ### Environment ###
 .env
