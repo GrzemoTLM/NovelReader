@@ -75,3 +75,5 @@ backups/*
 # (opcjonalnie) plik pomocniczy ze Spring Initializr
 HELP.md
 
+# tymczasowy lokalny folder z książkami
+/books/
