@@ -1,11 +1,11 @@
 package org.example.novelreader.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.novelreader.dto.BookRequest;
-import org.example.novelreader.dto.BookResponse;
+import org.example.novelreader.dto.*;
 import org.example.novelreader.entity.User;
 import org.example.novelreader.security.CustomUserDetailsService;
 import org.example.novelreader.service.BookService;
+import org.example.novelreader.service.BookProgressService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -19,41 +19,78 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
+    private final BookProgressService progressService;
     private final CustomUserDetailsService customUserDetailsService;
 
     @PostMapping("/upload")
     public ResponseEntity<BookResponse> uploadBook(
-            Authentication authentication,
+            Authentication auth,
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
             @RequestParam(value = "author", required = false) String author,
             @RequestParam(value = "description", required = false) String description
     ) {
-        User user = customUserDetailsService.findUserByUsernameOrEmail(authentication.getName());
-        Long userId = user.getId();
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        BookRequest req = BookRequest.builder()
+                .file(file)
+                .title(title)
+                .author(author)
+                .description(description)
+                .build();
 
-        BookRequest request = new BookRequest();
-        request.setFile(file);
-        request.setTitle(title);
-        request.setAuthor(author);
-        request.setDescription(description);
-
-        BookResponse response = bookService.uploadBook(userId, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(bookService.uploadBook(user.getId(), req));
     }
 
     @GetMapping
-    public ResponseEntity<List<BookResponse>> getUserBooks(Authentication authentication) {
-        User user = customUserDetailsService.findUserByUsernameOrEmail(authentication.getName());
-        Long userId = user.getId();
-        return ResponseEntity.ok(bookService.getUserBooks(userId));
+    public ResponseEntity<List<BookResponse>> getUserBooks(Authentication auth) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        return ResponseEntity.ok(bookService.getUserBooks(user.getId()));
+    }
+
+    @GetMapping("/{id}/content")
+    public ResponseEntity<EpubDto> getBookContent(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        return ResponseEntity.ok(bookService.getParsedBook(user.getId(), id));
+    }
+
+    @GetMapping("/{id}/preview")
+    public ResponseEntity<String> getBookPreview(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        return ResponseEntity.ok(bookService.getBookPreview(user.getId(), id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id, Authentication authentication) {
-        User user = customUserDetailsService.findUserByUsernameOrEmail(authentication.getName());
-        Long userId = user.getId();
-        bookService.deleteBook(userId, id);
+    public ResponseEntity<Void> deleteBook(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        bookService.deleteBook(user.getId(), id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/progress")
+    public ResponseEntity<BookProgressResponse> getProgress(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        return ResponseEntity.ok(progressService.getProgress(user.getId(), id));
+    }
+
+    @PostMapping("/{id}/progress")
+    public ResponseEntity<BookProgressResponse> updateProgress(
+            @PathVariable Long id,
+            Authentication auth,
+            @RequestBody BookProgressRequest req
+    ) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        return ResponseEntity.ok(progressService.updateProgress(user.getId(), id, req));
     }
 }
