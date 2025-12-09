@@ -53,6 +53,8 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
