@@ -1,16 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.core.novelreader_client.HelloController">
-  <padding>
-    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-  </padding>
-
-  <Label fx:id="welcomeText"/>
-  <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<BorderPane xmlns:fx="http://javafx.com/fxml" 
+            fx:controller="org.core.novelreader_client.HelloController"
+            style="-fx-background-color: #f5f5f5;">
+    <!-- Top Bar -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" 
+              style="-fx-background-color: #667eea; -fx-padding: 15;">
+            <Label text="Novel Reader" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Wyloguj" onAction="#onLogoutClick"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 8 15; -fx-background-radius: 5;"/>
+        </HBox>
+    </top>
+    <!-- Main Content -->
+    <center>
+        <VBox spacing="15" style="-fx-padding: 20;">
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Moje Książki" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="addBookButton" text="+ Dodaj Książkę" onAction="#onAddBookClick"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-padding: 8 15; -fx-background-radius: 5;"/>
+                <Button fx:id="refreshButton" text="Odśwież" onAction="#onRefreshClick"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 8 15; -fx-background-radius: 5;"/>
+            </HBox>
+            <!-- Status/Error Label -->
+            <Label fx:id="statusLabel" text="" style="-fx-text-fill: #e74c3c;" wrapText="true"/>
+            <!-- Loading Indicator -->
+            <ProgressIndicator fx:id="loadingIndicator" prefWidth="40" prefHeight="40" visible="false"/>
+            <!-- Books List -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" 
+                        style="-fx-background-color: white; -fx-border-color: #ddd;">
+                <VBox fx:id="booksContainer" spacing="10" style="-fx-padding: 15; -fx-background-color: white;">
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </center>
+</BorderPane>

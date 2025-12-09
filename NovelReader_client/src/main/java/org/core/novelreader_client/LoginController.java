@@ -85,10 +85,11 @@ public class LoginController {
     private void navigateToMainView() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 800, 600);
+            Scene scene = new Scene(fxmlLoader.load(), 900, 600);
             Stage stage = (Stage) loginButton.getScene().getWindow();
             stage.setScene(scene);
-            stage.setTitle("Novel Reader");
+            stage.setTitle("Novel Reader - Twoje książki");
+            stage.setResizable(true);
         } catch (IOException e) {
             showError("Nie można załadować głównego widoku");
             e.printStackTrace();
@@ -107,4 +108,3 @@ public class LoginController {
         passwordField.setDisable(loading);
     }
 }
-

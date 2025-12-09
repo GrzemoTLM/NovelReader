@@ -12,6 +12,9 @@ module org.core.novelreader_client {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
 
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.datatype.jsr310;
+
     opens org.core.novelreader_client to javafx.fxml;
     exports org.core.novelreader_client;
 }
