@@ -6,11 +6,13 @@ import org.example.novelreader.entity.User;
 import org.example.novelreader.security.CustomUserDetailsService;
 import org.example.novelreader.service.BookService;
 import org.example.novelreader.service.BookProgressService;
+import org.example.novelreader.service.EpubService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -20,7 +22,16 @@ public class BookController {
 
     private final BookService bookService;
     private final BookProgressService progressService;
+    private final EpubService epubService;
     private final CustomUserDetailsService customUserDetailsService;
+
+    @PostMapping("/parse-metadata")
+    public ResponseEntity<MetadataDto> parseMetadata(
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        EpubDto parsed = epubService.parseEpub(file);
+        return ResponseEntity.ok(parsed.getMetadata());
+    }
 
     @PostMapping("/upload")
     public ResponseEntity<BookResponse> uploadBook(

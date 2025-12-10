@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.core.novelreader_client.ReaderController"
+            prefWidth="900" prefHeight="700" style="-fx-background-color: #f5f5f5;">
+
+    <top>
+        <VBox style="-fx-background-color: #2c3e50;">
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <padding>
+                    <Insets top="10" right="15" bottom="10" left="15"/>
+                </padding>
+                <Button fx:id="backButton" text="← Powrót" onAction="#onBackClick"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand;"/>
+                <Label fx:id="titleLabel" text="Tytuł książki"
+                       style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"
+                       HBox.hgrow="ALWAYS"/>
+                <HBox spacing="8" alignment="CENTER_RIGHT">
+                    <Button text="-" onAction="#onDecreaseFontSize"
+                            style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-min-width: 30; -fx-cursor: hand;"/>
+                    <Label fx:id="fontSizeLabel" text="16px" style="-fx-text-fill: white;"/>
+                    <Button text="+" onAction="#onIncreaseFontSize"
+                            style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-min-width: 30; -fx-cursor: hand;"/>
+                    <Button fx:id="themeButton" text="🌙" onAction="#onToggleTheme"
+                            style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-cursor: hand;"/>
+                </HBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER">
+            <ProgressIndicator fx:id="loadingIndicator" visible="false" prefWidth="50" prefHeight="50"/>
+            <Label fx:id="errorLabel" text="" visible="false"
+                   style="-fx-text-fill: #e74c3c; -fx-font-size: 14px; -fx-padding: 20;"/>
+            <WebView fx:id="contentWebView" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #ecf0f1;">
+            <padding>
+                <Insets top="10" right="15" bottom="10" left="15"/>
+            </padding>
+            <Button fx:id="prevChapterButton" text="← Poprzedni" onAction="#onPrevChapter"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand;"/>
+            <Label fx:id="chapterLabel" text="Rozdział 1 / 1"/>
+            <Button fx:id="nextChapterButton" text="Następny →" onAction="#onNextChapter"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand;"/>
+        </HBox>
+    </bottom>
+</BorderPane>
+

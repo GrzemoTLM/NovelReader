@@ -1,7 +1,7 @@
 package org.core.novelreader_client;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -9,6 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+
 public class AuthService {
     private static final String BASE_URL = "http://localhost:8080/api/v1/auth";
     private final HttpClient httpClient;
@@ -21,6 +22,7 @@ public class AuthService {
                 .build();
         this.objectMapper = new ObjectMapper();
     }
+
     public CompletableFuture<AuthResult> login(String username, String password) {
         String jsonBody = String.format(
                 "{\"usernameOrEmail\":\"%s\",\"password\":\"%s\"}",
@@ -56,6 +58,7 @@ public class AuthService {
                     }
                 });
     }
+
     public CompletableFuture<AuthResult> register(String username, String email, String password) {
         String jsonBody = String.format(
                 "{\"username\":\"%s\",\"email\":\"%s\",\"password\":\"%s\"}",
@@ -63,12 +66,14 @@ public class AuthService {
                 escapeJson(email),
                 escapeJson(password)
         );
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/register"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .timeout(Duration.ofSeconds(30))
                 .build();
+
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
                     if (response.statusCode() == 200 || response.statusCode() == 201) {
@@ -80,12 +85,15 @@ public class AuthService {
                     }
                 });
     }
+
     public static String getAuthToken() {
         return authToken;
     }
+
     public static void logout() {
         authToken = null;
     }
+
     private String extractToken(String responseBody) {
         try {
             JsonNode jsonNode = objectMapper.readTree(responseBody);
@@ -102,6 +110,7 @@ public class AuthService {
         }
         return null;
     }
+
     private String escapeJson(String value) {
         if (value == null) return "";
         return value.replace("\\", "\\\\")
@@ -110,18 +119,23 @@ public class AuthService {
                 .replace("\r", "\\r")
                 .replace("\t", "\\t");
     }
+
     public static class AuthResult {
         private final boolean success;
         private final String message;
+
         public AuthResult(boolean success, String message) {
             this.success = success;
             this.message = message;
         }
+
         public boolean isSuccess() {
             return success;
         }
+
         public String getMessage() {
             return message;
         }
     }
 }
+
