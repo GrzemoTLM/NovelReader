@@ -55,8 +55,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.1")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
+    testImplementation("org.junit.platform:junit-platform-launcher:1.12.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-engine:1.12.1")
 }
 
 tasks.withType<Test> {
