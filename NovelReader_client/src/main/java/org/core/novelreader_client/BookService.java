@@ -81,13 +81,12 @@ public class BookService {
             String fileName = filePath.getFileName().toString();
             String boundary = "----FormBoundary" + System.currentTimeMillis();
 
-            StringBuilder sb = new StringBuilder();
             String CRLF = "\r\n";
-            sb.append("--").append(boundary).append(CRLF);
-            sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(fileName).append("\"").append(CRLF);
-            sb.append("Content-Type: application/octet-stream").append(CRLF).append(CRLF);
+            String sb = "--" + boundary + CRLF +
+                    "Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"" + CRLF +
+                    "Content-Type: application/octet-stream" + CRLF + CRLF;
 
-            byte[] header = sb.toString().getBytes();
+            byte[] header = sb.getBytes();
             byte[] footer = (CRLF + "--" + boundary + "--" + CRLF).getBytes();
             byte[] body = new byte[header.length + fileContent.length + footer.length];
             System.arraycopy(header, 0, body, 0, header.length);
@@ -271,25 +270,21 @@ public class BookService {
     private byte[] buildMultipartBody(String boundary, byte[] fileContent, String fileName,
                                       String title, String author, String description) {
         String CRLF = "\r\n";
-        StringBuilder sb = new StringBuilder();
 
-        sb.append("--").append(boundary).append(CRLF);
-        sb.append("Content-Disposition: form-data; name=\"title\"").append(CRLF).append(CRLF);
-        sb.append(title).append(CRLF);
+        String sb = "--" + boundary + CRLF +
+                "Content-Disposition: form-data; name=\"title\"" + CRLF + CRLF +
+                title + CRLF +
+                "--" + boundary + CRLF +
+                "Content-Disposition: form-data; name=\"author\"" + CRLF + CRLF +
+                author + CRLF +
+                "--" + boundary + CRLF +
+                "Content-Disposition: form-data; name=\"description\"" + CRLF + CRLF +
+                description + CRLF +
+                "--" + boundary + CRLF +
+                "Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"" + CRLF +
+                "Content-Type: application/octet-stream" + CRLF + CRLF;
 
-        sb.append("--").append(boundary).append(CRLF);
-        sb.append("Content-Disposition: form-data; name=\"author\"").append(CRLF).append(CRLF);
-        sb.append(author).append(CRLF);
-
-        sb.append("--").append(boundary).append(CRLF);
-        sb.append("Content-Disposition: form-data; name=\"description\"").append(CRLF).append(CRLF);
-        sb.append(description).append(CRLF);
-
-        sb.append("--").append(boundary).append(CRLF);
-        sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(fileName).append("\"").append(CRLF);
-        sb.append("Content-Type: application/octet-stream").append(CRLF).append(CRLF);
-
-        byte[] header = sb.toString().getBytes();
+        byte[] header = sb.getBytes();
         byte[] footer = (CRLF + "--" + boundary + "--" + CRLF).getBytes();
 
         byte[] result = new byte[header.length + fileContent.length + footer.length];
