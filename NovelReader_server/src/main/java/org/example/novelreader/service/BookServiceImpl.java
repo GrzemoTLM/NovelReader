@@ -1,8 +1,10 @@
 package org.example.novelreader.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.novelreader.dto.BookRequest;
 import org.example.novelreader.dto.BookResponse;
+import org.example.novelreader.dto.EpubDto;
 import org.example.novelreader.entity.Book;
 import org.example.novelreader.entity.User;
 import org.example.novelreader.repository.BookRepository;
@@ -27,12 +29,15 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final EpubService epubService;
+    private final ObjectMapper objectMapper;
 
     @Value("${book.storage.path}")
     private String storagePath;
 
     @Override
     public BookResponse uploadBook(Long userId, BookRequest request) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -44,11 +49,10 @@ public class BookServiceImpl implements BookService {
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
         String userDirPath = storagePath + "/" + userId;
         new File(userDirPath).mkdirs();
-        String filePath = userDirPath + "/" + System.currentTimeMillis() + "_" + filename;
 
+        String filePath = userDirPath + "/" + System.currentTimeMillis() + "_" + filename;
         try {
-            Path path = Paths.get(filePath);
-            Files.write(path, file.getBytes());
+            Files.write(Paths.get(filePath), file.getBytes());
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file", e);
         }
@@ -64,6 +68,16 @@ public class BookServiceImpl implements BookService {
 
         bookRepository.save(book);
 
+        try {
+            EpubDto epubDto = epubService.parseEpubFromFilePath(filePath);
+
+            File jsonFile = new File(filePath + ".json");
+            objectMapper.writeValue(jsonFile, epubDto);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not parse EPUB", e);
+        }
+
         return mapToResponse(book);
     }
 
@@ -78,8 +92,13 @@ public class BookServiceImpl implements BookService {
     @Override
     public void deleteBook(Long userId, Long bookId) {
         Book book = getBookByIdAndUser(userId, bookId);
+
         File file = new File(book.getFilePath());
         if (file.exists()) file.delete();
+
+        File json = new File(book.getFilePath() + ".json");
+        if (json.exists()) json.delete();
+
         bookRepository.delete(book);
     }
 
@@ -88,6 +107,32 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findById(bookId)
                 .filter(b -> b.getOwner().getId().equals(userId))
                 .orElseThrow(() -> new RuntimeException("Book not found or access denied"));
+    }
+
+    @Override
+    public EpubDto getParsedBook(Long userId, Long bookId) {
+        Book book = getBookByIdAndUser(userId, bookId);
+
+        File jsonFile = new File(book.getFilePath() + ".json");
+
+        try {
+            if (jsonFile.exists()) {
+                return objectMapper.readValue(jsonFile, EpubDto.class);
+            }
+
+            EpubDto dto = epubService.parseEpubFromFilePath(book.getFilePath());
+            objectMapper.writeValue(jsonFile, dto);
+            return dto;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load EPUB content", e);
+        }
+    }
+
+    @Override
+    public String getBookPreview(Long userId, Long bookId) {
+        EpubDto dto = getParsedBook(userId, bookId);
+        return epubService.generatePreview(dto, 3000);
     }
 
     private BookResponse mapToResponse(Book book) {

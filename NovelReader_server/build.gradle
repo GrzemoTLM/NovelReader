@@ -20,6 +20,10 @@ configurations {
         extendsFrom annotationProcessor
     }
 }
+configurations.all {
+    exclude group: "org.slf4j", module: "slf4j-simple"
+}
+
 
 repositories {
     mavenCentral()
@@ -46,6 +50,10 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
     implementation 'io.swagger.core.v3:swagger-models-jakarta:2.2.21'
     implementation 'io.swagger.core.v3:swagger-core-jakarta:2.2.21'
+
+    // Epub support
+    implementation 'com.positiondev.epublib:epublib-core:3.1'
+    implementation 'org.jsoup:jsoup:1.16.1'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
