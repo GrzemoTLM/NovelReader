@@ -5,6 +5,7 @@ import org.example.novelreader.dto.BookmarkResponse;
 
 import java.util.List;
 
+// zakładki osobno od książek - łatwiej ogarnąć i przetestować (ISP - Interface Segregation)
 public interface BookmarkService {
 
     BookmarkResponse createBookmark(Long userId, BookmarkRequest request);
@@ -23,4 +24,3 @@ public interface BookmarkService {
 
     boolean bookmarkExists(Long userId, Long bookId, Integer chapterIndex, Integer characterOffset);
 }
-

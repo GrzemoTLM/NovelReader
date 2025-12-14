@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// Spring Data robi magię - sam generuje implementację w runtime (DIP - Dependency Inversion)
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -17,4 +18,3 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 }
-
