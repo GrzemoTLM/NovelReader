@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+// centralna obsługa błędów - kontrolery nie muszą się tym zajmować (SRP - Single Responsibility)
+// jak dojdzie nowy wyjątek to dodajemy metodę i git (OCP - Open/Closed)
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -47,4 +49,3 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 }
-

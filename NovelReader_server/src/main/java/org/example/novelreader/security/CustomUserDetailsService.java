@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+// implementacja UserDetailsService dla Spring Security (LSP - Liskov)
+// szukamy usera po username albo email
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {

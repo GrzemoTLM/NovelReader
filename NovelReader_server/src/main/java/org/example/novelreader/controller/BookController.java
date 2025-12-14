@@ -26,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+// kontroler tylko przyjmuje requesty i oddaje do serwisów (SRP - Single Responsibility)
+// cała logika siedzi w service layer (DIP - Dependency Inversion)
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor

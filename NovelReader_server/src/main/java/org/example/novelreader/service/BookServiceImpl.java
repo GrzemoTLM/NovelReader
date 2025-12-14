@@ -23,13 +23,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
+ * Główna logika książek. Parsowanie EPUB delegujemy do EpubService
+ * żeby ta klasa nie urosła do 500 linii xD (SRP - Single Responsibility)
+ *
+ * Wstrzykujemy interfejsy a nie klasy - dzięki temu testy są prostsze
+ * (można podmienić na mocki) (DIP - Dependency Inversion)
+ */
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
-    private final EpubService epubService;
+    private final EpubService epubService;  // delegujemy parsowanie
     private final ObjectMapper objectMapper;
 
     @Value("${book.storage.path}")

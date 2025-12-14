@@ -295,10 +295,164 @@ public class BookService {
         return result;
     }
 
+    public CompletableFuture<List<BookmarkDto>> getBookmarks(Long bookId) {
+        String token = AuthService.getAuthToken();
+        if (token == null || token.isBlank()) {
+            System.err.println("getBookmarks: Brak tokenu");
+            return CompletableFuture.completedFuture(List.of());
+        }
+
+        String url = BOOKS_URL + "/" + bookId + "/bookmarks";
+        System.out.println("Fetching bookmarks from: " + url);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + token)
+                .timeout(Duration.ofSeconds(30))
+                .GET()
+                .build();
+
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    System.out.println("Get bookmarks response: " + response.statusCode() + " - " + response.body());
+                    if (response.statusCode() == 200) {
+                        try {
+                            String body = response.body();
+                            if (body == null || body.trim().isEmpty() || body.equals("[]")) {
+                                return List.<BookmarkDto>of();
+                            }
+                            return objectMapper.readValue(body, new TypeReference<List<BookmarkDto>>() {});
+                        } catch (IOException e) {
+                            System.err.println("Błąd parsowania zakładek: " + e.getMessage());
+                            return List.<BookmarkDto>of();
+                        }
+                    }
+                    System.err.println("Błąd pobierania zakładek: " + response.statusCode());
+                    return List.<BookmarkDto>of();
+                })
+                .exceptionally(ex -> {
+                    System.err.println("Exception in getBookmarks: " + ex.getMessage());
+                    return List.of();
+                });
+    }
+
+    public CompletableFuture<BookmarkDto> addBookmark(Long bookId, int chapterIndex, String label) {
+        return addBookmark(bookId, chapterIndex, label, 0.0, null);
+    }
+
+    public CompletableFuture<BookmarkDto> addBookmark(Long bookId, int chapterIndex, String label, double progressPercent, String textSnippet) {
+        String token = AuthService.getAuthToken();
+        if (token == null || token.isBlank()) {
+            CompletableFuture<BookmarkDto> failed = new CompletableFuture<>();
+            failed.completeExceptionally(new IllegalStateException("Brak tokenu"));
+            return failed;
+        }
+
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("{\"chapterIndex\":").append(chapterIndex);
+        jsonBuilder.append(",\"characterOffset\":0");
+        jsonBuilder.append(",\"title\":\"").append(escapeJson(label)).append("\"");
+        if (progressPercent > 0) {
+            jsonBuilder.append(",\"progressPercent\":").append(progressPercent);
+        }
+        if (textSnippet != null && !textSnippet.isBlank()) {
+            jsonBuilder.append(",\"textSnippet\":\"").append(escapeJson(textSnippet.length() > 100 ? textSnippet.substring(0, 100) : textSnippet)).append("\"");
+        }
+        jsonBuilder.append("}");
+        String json = jsonBuilder.toString();
+
+        System.out.println("Adding bookmark: " + json);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BOOKS_URL + "/" + bookId + "/bookmarks"))
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofSeconds(30))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    System.out.println("Add bookmark response: " + response.statusCode() + " - " + response.body());
+                    if (response.statusCode() == 200 || response.statusCode() == 201) {
+                        try {
+                            return objectMapper.readValue(response.body(), BookmarkDto.class);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Błąd parsowania odpowiedzi: " + e.getMessage(), e);
+                        }
+                    } else if (response.statusCode() == 401) {
+                        throw new RuntimeException("Sesja wygasła. Zaloguj się ponownie.");
+                    } else if (response.statusCode() == 403) {
+                        throw new RuntimeException("Brak uprawnień do dodania zakładki.");
+                    } else if (response.statusCode() == 404) {
+                        throw new RuntimeException("Książka nie znaleziona.");
+                    }
+                    throw new RuntimeException("Błąd dodawania zakładki: " + response.statusCode() + " - " + response.body());
+                });
+    }
+
+    public CompletableFuture<Void> deleteBookmark(Long bookId, Long bookmarkId) {
+        String token = AuthService.getAuthToken();
+        if (token == null || token.isBlank()) {
+            CompletableFuture<Void> failed = new CompletableFuture<>();
+            failed.completeExceptionally(new IllegalStateException("Brak tokenu"));
+            return failed;
+        }
+
+        String url = BOOKS_URL + "/" + bookId + "/bookmarks/" + bookmarkId;
+        System.out.println("Deleting bookmark: " + url);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + token)
+                .timeout(Duration.ofSeconds(30))
+                .DELETE()
+                .build();
+
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    System.out.println("Delete bookmark response: " + response.statusCode());
+                    if (response.statusCode() == 204 || response.statusCode() == 200) {
+                        return null;
+                    } else if (response.statusCode() == 401) {
+                        throw new RuntimeException("Sesja wygasła.");
+                    } else if (response.statusCode() == 403) {
+                        throw new RuntimeException("Brak uprawnień do usunięcia zakładki.");
+                    } else if (response.statusCode() == 404) {
+                        throw new RuntimeException("Zakładka nie znaleziona.");
+                    }
+                    throw new RuntimeException("Błąd usuwania zakładki: " + response.statusCode());
+                });
+    }
+
+    private String escapeJson(String text) {
+        if (text == null) return "";
+        return text.replace("\\", "\\\\")
+                   .replace("\"", "\\\"")
+                   .replace("\n", "\\n")
+                   .replace("\r", "\\r")
+                   .replace("\t", "\\t");
+    }
+
     public record BookDto(Long id, String title, String author, String description, String uploadedAt) {}
     public record EpubDto(MetadataDto metadata, List<ChapterDto> chapters) {}
     public record ChapterDto(int index, String title, String html, String text) {}
     public record MetadataDto(String title, String author, String language, String identifier, String description) {}
     public record ProgressDto(Long bookId, int chapterIndex, int offsetInChapter) {}
+    public record BookmarkDto(
+            Long id,
+            Long bookId,
+            String bookTitle,
+            int chapterIndex,
+            String chapterTitle,
+            Integer characterOffset,
+            Double progressPercent,
+            String label,
+            String note,
+            String textSnippet,
+            String color,
+            String createdAt,
+            String updatedAt
+    ) {}
 }
 

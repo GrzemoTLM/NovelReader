@@ -33,8 +33,8 @@ public class BookmarkController {
     private final CustomUserDetailsService customUserDetailsService;
 
     @Operation(summary = "Utwórz nową zakładkę",
-            description = "Tworzy zakładkę w określonym miejscu rozdziału. " +
-                    "characterOffset określa pozycję znaku od początku tekstu rozdziału.")
+               description = "Tworzy zakładkę w określonym miejscu rozdziału. " +
+                            "characterOffset określa pozycję znaku od początku tekstu rozdziału.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Zakładka została utworzona",
                     content = @Content(schema = @Schema(implementation = BookmarkResponse.class))),
@@ -70,7 +70,7 @@ public class BookmarkController {
     }
 
     @Operation(summary = "Pobierz wszystkie zakładki użytkownika",
-            description = "Zwraca listę wszystkich zakładek zalogowanego użytkownika, posortowanych od najnowszych")
+               description = "Zwraca listę wszystkich zakładek zalogowanego użytkownika, posortowanych od najnowszych")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista zakładek"),
             @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
@@ -83,8 +83,8 @@ public class BookmarkController {
     }
 
     @Operation(summary = "Pobierz zakładki dla książki",
-            description = "Zwraca wszystkie zakładki użytkownika dla określonej książki, " +
-                    "posortowane według rozdziału i pozycji w rozdziale")
+               description = "Zwraca wszystkie zakładki użytkownika dla określonej książki, " +
+                            "posortowane według rozdziału i pozycji w rozdziale")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista zakładek dla książki"),
             @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
@@ -135,7 +135,7 @@ public class BookmarkController {
     }
 
     @Operation(summary = "Usuń wszystkie zakładki dla książki",
-            description = "Usuwa wszystkie zakładki użytkownika dla określonej książki")
+               description = "Usuwa wszystkie zakładki użytkownika dla określonej książki")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Zakładki zostały usunięte"),
             @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
@@ -151,7 +151,7 @@ public class BookmarkController {
     }
 
     @Operation(summary = "Sprawdź czy zakładka istnieje",
-            description = "Sprawdza czy użytkownik ma już zakładkę w dokładnie tym samym miejscu")
+               description = "Sprawdza czy użytkownik ma już zakładkę w dokładnie tym samym miejscu")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Wynik sprawdzenia (true/false)"),
             @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
