@@ -9,12 +9,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.novelreader.dto.*;
 import org.example.novelreader.entity.User;
 import org.example.novelreader.security.CustomUserDetailsService;
 import org.example.novelreader.service.BookService;
 import org.example.novelreader.service.BookProgressService;
+import org.example.novelreader.service.BookmarkService;
 import org.example.novelreader.service.EpubService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -26,12 +29,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Książki", description = "Endpointy do zarządzania książkami użytkownika")
 @SecurityRequirement(name = "bearerAuth")
 public class BookController {
 
     private final BookService bookService;
     private final BookProgressService progressService;
+    private final BookmarkService bookmarkService;
     private final EpubService epubService;
     private final CustomUserDetailsService customUserDetailsService;
 
@@ -182,5 +187,86 @@ public class BookController {
     ) {
         User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
         return ResponseEntity.ok(progressService.updateProgress(user.getId(), id, req));
+    }
+
+    @Operation(summary = "Dodaj zakładkę do książki", description = "Tworzy nową zakładkę w określonym miejscu książki")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Zakładka została utworzona",
+                    content = @Content(schema = @Schema(implementation = BookmarkResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Nieprawidłowe dane wejściowe"),
+            @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
+            @ApiResponse(responseCode = "404", description = "Książka nie została znaleziona")
+    })
+    @PostMapping("/{bookId}/bookmarks")
+    public ResponseEntity<BookmarkResponse> createBookmarkForBook(
+            @Parameter(description = "ID książki", required = true)
+            @PathVariable Long bookId,
+            Authentication auth,
+            @RequestBody BookmarkRequest request
+    ) {
+        log.info("Dodawanie zakładki: bookId={}, request={}", bookId, request);
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        request.setBookId(bookId);
+        if (request.getChapterIndex() == null) {
+            request.setChapterIndex(0);
+        }
+        if (request.getCharacterOffset() == null) {
+            request.setCharacterOffset(0);
+        }
+        log.info("Request po uzupełnieniu: {}", request);
+        BookmarkResponse response = bookmarkService.createBookmark(user.getId(), request);
+        log.info("Zakładka utworzona: {}", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Pobierz zakładki dla książki", description = "Zwraca wszystkie zakładki użytkownika dla danej książki")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista zakładek"),
+            @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
+    })
+    @GetMapping("/{bookId}/bookmarks")
+    public ResponseEntity<List<BookmarkResponse>> getBookmarksForBook(
+            @Parameter(description = "ID książki", required = true)
+            @PathVariable Long bookId,
+            Authentication auth
+    ) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        List<BookmarkResponse> bookmarks = bookmarkService.getBookmarksForBook(user.getId(), bookId);
+        return ResponseEntity.ok(bookmarks);
+    }
+
+    @Operation(summary = "Usuń wszystkie zakładki z książki", description = "Usuwa wszystkie zakładki użytkownika dla danej książki")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Zakładki zostały usunięte"),
+            @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
+    })
+    @DeleteMapping("/{bookId}/bookmarks")
+    public ResponseEntity<Void> deleteAllBookmarksForBook(
+            @Parameter(description = "ID książki", required = true)
+            @PathVariable Long bookId,
+            Authentication auth
+    ) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        bookmarkService.deleteAllBookmarksForBook(user.getId(), bookId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Usuń zakładkę", description = "Usuwa pojedynczą zakładkę użytkownika")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Zakładka została usunięta"),
+            @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
+            @ApiResponse(responseCode = "404", description = "Zakładka nie została znaleziona")
+    })
+    @DeleteMapping("/{bookId}/bookmarks/{bookmarkId}")
+    public ResponseEntity<Void> deleteBookmark(
+            @Parameter(description = "ID książki", required = true)
+            @PathVariable Long bookId,
+            @Parameter(description = "ID zakładki", required = true)
+            @PathVariable Long bookmarkId,
+            Authentication auth
+    ) {
+        User user = customUserDetailsService.findUserByUsernameOrEmail(auth.getName());
+        bookmarkService.deleteBookmark(user.getId(), bookmarkId);
+        return ResponseEntity.noContent().build();
     }
 }
